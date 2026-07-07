@@ -611,7 +611,7 @@ async function shorten() {
     btn.innerHTML = "⚡ Hiding...";
 
     try {
-        const response = await fetch("/.netlify/functions/short", {
+        const response = await fetch("/short", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
