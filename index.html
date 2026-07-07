@@ -615,73 +615,52 @@ async function shorten() {
 
     try {
 
-        const response = await fetch("/.netlify/functions/short", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                url: url
-            })
-        });
+    const response = await fetch("/.netlify/functions/short", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url })
+    });
 
-        const data = await response.json();
+    const text = await response.text();
 
-        btn.disabled = false;
-        btn.innerHTML = "⚡ Hide Link";
+    console.log(text);
 
-        if (data.error) {
-            alert(data.error);
-            return;
-        }
+    const data = JSON.parse(text);
 
-        let title = "🔗 Link";
+    btn.disabled = false;
+    btn.innerHTML = "⚡ Hide Link";
 
-        switch (type) {
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
 
-            case "profile":
-                title = "👤 Roblox Profile";
-                break;
+    let title = "🔗 Link";
 
-            case "game":
-                title = "🎮 Roblox Game";
-                break;
+    switch(type){
+        case "profile": title="👤 Roblox Profile"; break;
+        case "game": title="🎮 Roblox Game"; break;
+        case "group": title="👥 Roblox Group"; break;
+        case "discord": title="💬 Discord Invite"; break;
+        case "youtube": title="📺 YouTube Video"; break;
+        default: title="🌐 Website";
+    }
 
-            case "group":
-                title = "👥 Roblox Group";
-                break;
-
-            case "discord":
-                title = "💬 Discord Invite";
-                break;
-
-            case "youtube":
-                title = "📺 YouTube Video";
-                break;
-
-            case "website":
-                title = "🌐 Website";
-                break;
-        }
-
-        const markdown =
+    const markdown =
 `> ### ${title}
 
 [Shockify](${data.shorturl})`;
 
-        document.getElementById("markdown").value = markdown;
-        document.getElementById("result").style.display = "block";
+    document.getElementById("markdown").value = markdown;
+    document.getElementById("result").style.display = "block";
 
-        navigator.clipboard.writeText(markdown);
+} catch(err){
 
-    } catch (e) {
+    console.error(err);
 
-        btn.disabled = false;
-        btn.innerHTML = "⚡ Hide Link";
-
-        alert("Failed to shorten link.");
-
-    }
+    alert(err.message);
 
 }
 
