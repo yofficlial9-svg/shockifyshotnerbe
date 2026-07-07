@@ -594,7 +594,6 @@ return "website";
 
 }
 async function shorten() {
-
     const url = document.getElementById("url").value.trim();
 
     if (!url) {
@@ -603,65 +602,66 @@ async function shorten() {
     }
 
     let type = document.getElementById("type").value;
-
     if (type === "auto") {
         type = detectType(url);
     }
 
     const btn = document.querySelector(".button");
-
     btn.disabled = true;
     btn.innerHTML = "⚡ Hiding...";
 
     try {
+        const response = await fetch("/.netlify/functions/short", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ url })
+        });
 
-    const response = await fetch("/.netlify/functions/short", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ url })
-    });
+        const data = await response.json();
 
-    const text = await response.text();
+        btn.disabled = false;
+        btn.innerHTML = "⚡ Hide Link";
 
-    console.log(text);
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
 
-    const data = JSON.parse(text);
+        let title = "🔗 Link";
 
-    btn.disabled = false;
-    btn.innerHTML = "⚡ Hide Link";
+        switch (type) {
+            case "profile":
+                title = "👤 Roblox Profile";
+                break;
+            case "game":
+                title = "🎮 Roblox Game";
+                break;
+            case "group":
+                title = "👥 Roblox Group";
+                break;
+            case "discord":
+                title = "💬 Discord Invite";
+                break;
+            case "youtube":
+                title = "📺 YouTube Video";
+                break;
+            default:
+                title = "🌐 Website";
+        }
 
-    if (data.error) {
-        alert(data.error);
-        return;
-    }
-
-    let title = "🔗 Link";
-
-    switch(type){
-        case "profile": title="👤 Roblox Profile"; break;
-        case "game": title="🎮 Roblox Game"; break;
-        case "group": title="👥 Roblox Group"; break;
-        case "discord": title="💬 Discord Invite"; break;
-        case "youtube": title="📺 YouTube Video"; break;
-        default: title="🌐 Website";
-    }
-
-    const markdown =
-`> ### ${title}
+        const markdown = `> ### ${title}
 
 [Shockify](${data.shorturl})`;
 
-    document.getElementById("markdown").value = markdown;
-    document.getElementById("result").style.display = "block";
+        document.getElementById("markdown").value = markdown;
+        document.getElementById("result").style.display = "block";
 
-} catch(err){
-
-    console.error(err);
-
-    alert(err.message);
-
+    } catch (err) {
+        console.error(err);
+        alert(err.message || "Failed to shorten link.");
+    }
 }
 
 function copyMarkdown() {
